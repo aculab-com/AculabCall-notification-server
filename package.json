@@ -1,5 +1,5 @@
 {
-  "name": "aculabcall-notification-server",
+  "name": "node-server-express",
   "version": "1.0.0",
   "description": "Aculab Node server for push notifications to work with example app",
   "main": "server.ts",

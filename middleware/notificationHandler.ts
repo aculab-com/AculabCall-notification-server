@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import * as apn from 'apn';
 import type { NotificationData } from '../types/types';
-import { NOTIFICATIONS } from '../constants';
+import { NOTIFICATIONS } from '../constants.dev';
 import axios from 'axios';
 
 const FCM_URL = 'https://fcm.googleapis.com/fcm/send';
@@ -125,6 +125,8 @@ export const sendNotificationIos = async (
         body: data.callee,
         uuid: data.uuid,
         webrtc_ready: data.webrtc_ready,
+        call_rejected: data.call_rejected,
+        call_cancelled: data.call_cancelled,
       },
       content_available: true,
       topic: 'all',
@@ -164,6 +166,8 @@ export const sendNotificationAndroid = async (
         body: data.callee,
         uuid: data.uuid,
         webrtc_ready: data.webrtc_ready,
+        call_rejected: data.call_rejected,
+        call_cancelled: data.call_cancelled,
       },
       priority: 'high',
       topic: 'all',
@@ -178,12 +182,3 @@ export const sendNotificationAndroid = async (
     });
   return response;
 };
-
-// inspirational code
-// curl -v
-//  --header "apns-topic: org.reactjs.native.example.AculabCallNExample.voip"
-//  --header "apns-push-type: voip"
-//  --header "apns-id: 123e4567-e89b-12d3-a456-4266554400a0"
-//  --cert VOIP.pem:password
-//  --data '{"uuid":"123e4567-e89b-12d3-a456-4266554400a0", "callerName":"test", "handle":"some handle"}'
-//  --http2  https://api.sandbox.push.apple.com/3/device/2354trgdgs45g4565rstsg564t6wt

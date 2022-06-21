@@ -7,9 +7,7 @@ Using AculabCall component and VoIP Apple notifications and FCM silent notificat
 please note that FCM notifications can be used for call to iOS and Android, however
 this example server uses APN for iOS call to demonstrate its use.
 
-## Setup
-
-### Apple APN
+## Apple APN
 
 1. Set up VoIP notifications
 
@@ -36,11 +34,11 @@ Key Attributes: <No Attributes>
 
 ```
 
-### Aculab and FCM Constants
+## Aculab and FCM Constants
 
 Store Aculab constants for WebRTC registration and FCM constants for sending silent notifications.
 
-For example this server uses file constants.ts in format (values in this example are fictional)
+For example this server uses file constants.dev.ts in format (values in this example are fictional)
 
 ```ts
 // WebRTC constants
@@ -78,7 +76,7 @@ export const NOTIFICATIONS = {
 };
 ```
 
-### Use the server
+## Use the server
 
 install dependencies
 
@@ -92,7 +90,7 @@ To run the server use run bellow command from root folder
 npm run dev
 ```
 
-### SQLite database
+## SQLite database
 
 This server uses SQLite database, it requires empty notificationServer.db file in the root folder, the users table is created when the server runs for the first time.
 
@@ -103,9 +101,9 @@ and proper database is set up.
 
 Please be aware that current PK is username
 
-### end points
+## end points
 
-#### /users
+### /users
 
 GET - returns all users
 POST - registers user - platform expected is ios/android/web
@@ -142,7 +140,7 @@ request
 }
 ```
 
-#### /users/user
+### /users/user
 
 GET - returns user details
 
@@ -154,7 +152,7 @@ request
 }
 ```
 
-#### users/get_token
+### users/get_token
 
 POST - refresh WebRTC Token (token is returned)
 
@@ -167,36 +165,12 @@ request
 }
 ```
 
-### Important Notes
+## Important Notes
 
 You cannot call a user which is not registered on server, therefore if you wanna call a web browser it has to be registered using "platform": "web" and it needs to have "webrtcToken" not null (any string, e.g. "fake_token").
 
-#### Testing
+### Testing
 
-Please note that application launched from terminal/Xcode/Android Studio behaves as separate instance from app launched from the phone. For example if you run an app from Xcode, register user with webrtc and that kill the app, calling the user starts an app instance which is not registered with webrtc (uses different storage, therefore the user credentials are not found in the app, however they exist on the server). In this case you can manually delete the user from the server.
+Please note that application launched from terminal/Xcode/Android Studio behaves as separate instance from app launched from the phone. For example if you run an app from Xcode, register user and then kill the app, calling the user starts an app instance which is not registered (uses different storage, therefore the user credentials are not found in the app, however they exist on the server). In this case you can manually delete the user from the server and register again.
 
 Best testing practice is to install the app on the phone and open it on the phone. This way you get the correct behavior.
-
-## License
-
-MIT
-
-Copyright (c) 2022 Aculab
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.

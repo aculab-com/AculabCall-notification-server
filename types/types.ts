@@ -16,6 +16,8 @@ export interface Notification {
   caller: string;
   callee: string;
   webrtc_ready?: boolean;
+  call_rejected?: boolean;
+  call_cancelled?: boolean;
 }
 
 export interface NotificationData {
@@ -26,6 +28,8 @@ export interface NotificationData {
   iosDeviceToken?: string;
   bundle: string;
   webrtc_ready?: boolean;
+  call_rejected?: boolean;
+  call_cancelled?: boolean;
 }
 
 export interface NotificationDataAndroid {

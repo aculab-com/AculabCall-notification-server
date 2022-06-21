@@ -3,7 +3,7 @@ import { getToken } from '../middleware/userRegistration';
 import type { User } from '../types/types';
 import { connectDb, createNewUser, deleteUser, getAllUsers, getUser, updateFcmToken, updateIosToken, updatePlatform, updateWebrtcToken } from '../middleware/dbHandler';
 
-import { WEBRTC_REGISTRATION } from '../constants';
+import { WEBRTC_REGISTRATION } from '../constants.dev';
 
 /**
  * return all users
