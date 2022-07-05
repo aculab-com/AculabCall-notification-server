@@ -7,7 +7,7 @@ import {
 } from '../middleware/notificationHandler';
 import type { UsersData, User, Notification } from '../types/types';
 
-import { NOTIFICATIONS } from '../constants.dev';
+import { NOTIFICATIONS } from '../constants';
 import { connectDb, getUser } from '../middleware/dbHandler';
 
 /**
@@ -63,7 +63,7 @@ export const newCallNotification = async (
         uuid: notification.uuid,
         caller: notification.caller,
         iosDeviceToken: callee.iosDeviceToken,
-        bundle: NOTIFICATIONS.IOS_BUNDLE,
+        bundle: `${NOTIFICATIONS.IOS_BUNDLE}.voip`,
       });
       break;
     case 'android':
@@ -71,7 +71,7 @@ export const newCallNotification = async (
         uuid: notification.uuid,
         caller: notification.caller,
         fcmDeviceToken: callee.fcmDeviceToken,
-        bundle: NOTIFICATIONS.IOS_BUNDLE,
+        bundle: `${NOTIFICATIONS.IOS_BUNDLE}.voip`,
       });
       break;
     default:

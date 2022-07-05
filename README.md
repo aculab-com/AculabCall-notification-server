@@ -38,7 +38,7 @@ Key Attributes: <No Attributes>
 
 Store Aculab constants for WebRTC registration and FCM constants for sending silent notifications.
 
-For example this server uses file constants.dev.ts in format (values in this example are fictional)
+For example this server uses file constants.ts in format (values in this example are fictional)
 
 ```ts
 // WebRTC constants
@@ -63,8 +63,7 @@ export const WEBRTC_REGISTRATION = {
 };
 
 // Notifications constants
-const IOS_BUNDLE =
-  'org.reactjs.native.example.AnExample.voip';
+const IOS_BUNDLE = 'org.reactjs.native.example.AnExample';
 const ANDROID_BUNDLE = 'com.example.examplecode.AnExample';
 const FCM_KEY =
   'ABBBvP8d37w:APB91bHTQNuFw2KtnKOfgWWzo-ljDcy_obIq8n52aHk0vjhtlZlXQ1haTjYJHZK0-pzfU9kuKP6tPTm1PiVc9J1JHDimqxZVnbCKD2mn6yDXpFaye0VuTMDixJw7AW-bIy4gY-_zzjRH';

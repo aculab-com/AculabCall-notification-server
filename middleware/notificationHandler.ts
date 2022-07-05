@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import * as apn from 'apn';
 import type { NotificationData } from '../types/types';
-import { NOTIFICATIONS } from '../constants.dev';
+import { NOTIFICATIONS } from '../constants';
 import axios from 'axios';
 
 const FCM_URL = 'https://fcm.googleapis.com/fcm/send';
