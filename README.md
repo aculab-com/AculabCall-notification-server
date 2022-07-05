@@ -173,3 +173,9 @@ You cannot call a user which is not registered on server, therefore if you wanna
 Please note that application launched from terminal/Xcode/Android Studio behaves as separate instance from app launched from the phone. For example if you run an app from Xcode, register user and then kill the app, calling the user starts an app instance which is not registered (uses different storage, therefore the user credentials are not found in the app, however they exist on the server). In this case you can manually delete the user from the server and register again.
 
 Best testing practice is to install the app on the phone and open it on the phone. This way you get the correct behavior.
+
+## Troubleshooting
+
+if you make a call to and iOS and incoming call notification is not displayed, your issue is likely in voip setting
+
+if you make a call, iOS displays notification but after accepting the call, WebRTC State is idle and inbound is true and your second device shows outbound true and WebRTC Status idle FCM notifications are not going through. Check setting of your notifications in firebase console. Make sure that your iOS side in firebase console has [APNs Authentication Key](https://developer.clevertap.com/docs/how-to-create-an-ios-apns-auth-key), so firebase can send notifications to iOS via apple APN (firebase -> your_project -> Project settings -> Cloud Messaging).
