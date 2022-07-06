@@ -174,6 +174,10 @@ Please note that application launched from terminal/Xcode/Android Studio behaves
 
 Best testing practice is to install the app on the phone and open it on the phone. This way you get the correct behavior.
 
+## Register/Login user workflow
+
+![Register/Login user workflow](media/docs/images/user_registration_login_flow.png)
+
 ## Call via notifications workflow
 
 ![Call via notifications workflow diagram](media/docs/images/notification_call_flow.png)
