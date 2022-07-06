@@ -7,6 +7,8 @@ Using AculabCall component and VoIP Apple notifications and FCM silent notificat
 please note that FCM notifications can be used for call to iOS and Android, however
 this example server uses APN for iOS call to demonstrate its use.
 
+**Note** WebRTCDemo browser interface does not make use of notifications, therefore does work only with an app being open. Furthermore, to call WebRTCDemo browser interface, the browser client must be added as a user in this server database.
+
 ## Apple APN
 
 1. Set up VoIP notifications
