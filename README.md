@@ -174,6 +174,10 @@ Please note that application launched from terminal/Xcode/Android Studio behaves
 
 Best testing practice is to install the app on the phone and open it on the phone. This way you get the correct behavior.
 
+## Call via notifications workflow
+
+![Call via notifications workflow diagram](media/docs/images/notification_call_flow.png)
+
 ## Troubleshooting
 
 if you make a call to and iOS and incoming call notification is not displayed, your issue is likely in voip setting
