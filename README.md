@@ -9,6 +9,21 @@ this example server uses APN for iOS call to demonstrate its use.
 
 **Note** WebRTCDemo browser interface does not make use of notifications, therefore does work only with an app being open. Furthermore, to call WebRTCDemo browser interface, the browser client must be added as a user in this server database.
 
+- [Simple Node server for Push Notifications](#simple-node-server-for-push-notifications)
+  - [Apple APN](#apple-apn)
+  - [Aculab and FCM Constants](#aculab-and-fcm-constants)
+  - [Use the Server](#use-the-server)
+  - [SQLite Database](#sqlite-database)
+  - [End Points](#end-points)
+    - [/users](#users)
+    - [/users/user](#usersuser)
+    - [users/get_token](#usersget_token)
+  - [Important Notes](#important-notes)
+  - [Testing](#testing)
+  - [Register/Login user workflow](#registerlogin-user-workflow)
+  - [Call via notifications workflow](#call-via-notifications-workflow)
+  - [Troubleshooting](#troubleshooting)
+
 ## Apple APN
 
 1. Set up VoIP notifications
@@ -77,7 +92,7 @@ export const NOTIFICATIONS = {
 };
 ```
 
-## Use the server
+## Use the Server
 
 install dependencies
 
@@ -91,7 +106,7 @@ To run the server use run bellow command from root folder
 npm run dev
 ```
 
-## SQLite database
+## SQLite Database
 
 This server uses SQLite database, it requires empty notificationServer.db file in the root folder, the users table is created when the server runs for the first time.
 
@@ -102,7 +117,7 @@ and proper database is set up.
 
 Please be aware that current PK is username
 
-## end points
+## End Points
 
 ### /users
 
@@ -170,11 +185,11 @@ request
 
 You cannot call a user which is not registered on server, therefore if you wanna call a web browser it has to be registered using "platform": "web" and it needs to have "webrtcToken" not null (any string, e.g. "fake_token").
 
-### Testing
+## Testing
 
-Please note that application launched from terminal/Xcode/Android Studio behaves as separate instance from app launched from the phone. For example if you run an app from Xcode, register user and then kill the app, calling the user starts an app instance which is not registered (uses different storage, therefore the user credentials are not found in the app, however they exist on the server). In this case you can manually delete the user from the server and register again.
+Please note that application launched from terminal/Xcode/Android Studio behaves as separate instance from app launched from the phone. For example if you run an app from Xcode, register user and then kill the app, calling the user starts an app instance which is not registered (uses different storage, therefore the user credentials are not found in the app and the app takes you to the registration screen, however they exist on the server). In this case you can manually delete the user from the server and register again.
 
-Best testing practice is to install the app on the phone and open it on the phone. This way you get the correct behavior.
+**Best testing practice is to install the app on the phone from terminal/Xcode/Android Studio, kill it and open it on the phone. This way you get the correct behavior.**
 
 ## Register/Login user workflow
 
