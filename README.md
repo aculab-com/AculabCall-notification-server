@@ -4,13 +4,12 @@ This is an example server for react-native-aculab-client package
 
 Using AculabCall component and VoIP Apple notifications and FCM silent notifications.
 
-please note that FCM notifications can be used for call to iOS and Android, however
-this example server uses APN for iOS call to demonstrate its use.
+Please note that Firebase Cloud Messaging (FCM) notifications can be used for call to iOS and Android, however this example server uses Apple Push Notification services (APNs) for iOS call to demonstrate its use.
 
-**Note** WebRTCDemo browser interface does not make use of notifications, therefore does work only with an app being open. Furthermore, to call WebRTCDemo browser interface, the browser client must be added as a user in this server database.
+**Note:** WebRTCDemo browser interface does not make use of notifications, therefore does work only with an app being open. Furthermore, to call WebRTCDemo browser interface, the browser client must be added as a user in this server database.
 
 - [Simple Node server for Push Notifications](#simple-node-server-for-push-notifications)
-  - [Apple APN](#apple-apn)
+  - [Apple APNs](#apple-apns)
   - [Aculab and FCM Constants](#aculab-and-fcm-constants)
   - [Use the Server](#use-the-server)
   - [SQLite Database](#sqlite-database)
@@ -24,13 +23,13 @@ this example server uses APN for iOS call to demonstrate its use.
   - [Call via notifications workflow](#call-via-notifications-workflow)
   - [Troubleshooting](#troubleshooting)
 
-## Apple APN
+## Apple APNs
 
 1. Set up VoIP notifications
 
-2. download certificate and make it into VOIP.pem certificate
+2. Download certificate and make it into VOIP.pem certificate
 
-3. place the certificate to certificates folder
+3. Place the certificate to certificates folder
 
 expected VOIP.pem format:
 
@@ -94,7 +93,7 @@ export const NOTIFICATIONS = {
 
 ## Use the Server
 
-install dependencies
+Install dependencies
 
 ```terminal
 npm install
@@ -142,7 +141,7 @@ request (iosDeviceToken only for ios devices)
     "username": "user2",
     "platform": "ios",
     "fcmDeviceToken": "FCM_token",
-    "iosDeviceToken": "APN_token"
+    "iosDeviceToken": "APNs_token"
 }
 ```
 
@@ -201,6 +200,6 @@ Please note that application launched from terminal/Xcode/Android Studio behaves
 
 ## Troubleshooting
 
-if you make a call to and iOS and incoming call notification is not displayed, your issue is likely in voip setting
+If you make a call to and iOS and incoming call notification is not displayed, your issue is likely in voip setting
 
-if you make a call, iOS displays notification but after accepting the call, WebRTC State is idle and inbound is true and your second device shows outbound true and WebRTC Status idle FCM notifications are not going through. Check setting of your notifications in firebase console. Make sure that your iOS side in firebase console has [APNs Authentication Key](https://developer.clevertap.com/docs/how-to-create-an-ios-apns-auth-key), so firebase can send notifications to iOS via apple APN (firebase -> your_project -> Project settings -> Cloud Messaging).
+If you make a call, iOS displays notification but after accepting the call, WebRTC State is idle and inbound is true and your second device shows outbound true and WebRTC Status idle FCM notifications are not going through. Check setting of your notifications in firebase console. Make sure that your iOS side in firebase console has [APNs Authentication Key](https://developer.clevertap.com/docs/how-to-create-an-ios-apns-auth-key), so firebase can send notifications to iOS via apple APNs (firebase -> your_project -> Project settings -> Cloud Messaging).
