@@ -16,7 +16,7 @@ Please note that Firebase Cloud Messaging (FCM) notifications can be used for ca
   - [End Points](#end-points)
     - [/users](#users)
     - [/users/user](#usersuser)
-    - [users/get_token](#usersget_token)
+    - [/users/get_token](#usersget_token)
   - [Important Notes](#important-notes)
   - [Testing](#testing)
   - [Register/Login user workflow](#registerlogin-user-workflow)
@@ -167,7 +167,7 @@ request
 }
 ```
 
-### users/get_token
+### /users/get_token
 
 POST - refresh WebRTC Token (token is returned)
 
