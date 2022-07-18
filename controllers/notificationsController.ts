@@ -175,9 +175,13 @@ export const newNotification = async (
       return res.status(200).json({ message: 'calling_web_interface' });
   }
 
-  if (notificationResponse.success > 0 ) {
-    res.status(200).json({ message: notificationResponse });
-    } else {
-    res.status(400).json({ message: notificationResponse });
+  try {
+    if (notificationResponse.success > 0 ) {
+      res.status(200).json({ message: notificationResponse });
+      } else {
+      res.status(400).json({ message: notificationResponse });
+    }
+  } catch (err) {
+    console.error('FCM response error:', err);
   }
 };
