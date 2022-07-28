@@ -29,7 +29,7 @@ const app: Express = express();
 app.use(logger);
 
 app.use('/aculab_webrtc', express.static(__dirname + '/node_modules/aculab-webrtc'));
-app.use('/server_media', express.static(__dirname + '/media'));
+app.use('/root', express.static(__dirname + '/'));
 
 // Cross Origin Resource Sharing
 app.use(cors(corsOptions));

@@ -2,7 +2,7 @@
 <html>
 <head>
 	<title>Aculab Cloud WebRTC demo</title>
-	<link rel="icon" type="image/gif" href='/server_media/images/favicon.gif' />
+	<link rel="icon" type="image/gif" href='/root/media/images/favicon.gif' />
 	<script type='application/javascript' src='/aculab_webrtc/dist/AculabCloudCaller.js'></script>
 	<script type='application/javascript'>
 	var acc = null;
@@ -493,6 +493,46 @@
 			window.alert(`${err} - make sure you run following command from server root folder: npm run build-webrtc-demo`);
 		}
 	}
+
+	// add user to the server DB
+	async function addUserToDb() {
+		username = document.getElementById("clientId").value;
+		platform = 'web';
+		data = {"username": username, "platform": platform}
+
+		response = await fetch('/users',{
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(data)
+		})
+		if (response.status !== 201) {
+			console.log('111', response);
+			window.alert(`Client ID ${username} is already registered`);
+		} else {
+			make_client()
+		}
+	}
+
+		// delete user from the server DB
+	async function deleteUserFromDb() {
+		username = document.getElementById("clientId").value;
+		data = {"username": username}
+
+		response = await fetch('/users',{
+			method: 'DELETE',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(data)
+		})
+		if (response.status !== 200) {
+			console.log('111', response);
+			window.alert(`Client ID ${username} was not deleted from DB, it may not exist within the DB`);
+		}
+	}
+	
 	function make_client() {
 		cloudObj = document.getElementById("cloud");
 		cloud = cloudObj.value
@@ -546,6 +586,7 @@
 		if (inbound_enabled) {
 			unregister();
 		}
+		deleteUserFromDb();
 		stopStats();
 		acc = null;
 		cloudObj = document.getElementById("cloud");
@@ -746,7 +787,7 @@
 						<option selected="selected">8</option>
 					</select>
 					</td></tr><tr><td>
-						<button id="create_button" type="button" onclick="make_client()">Create</button>
+						<button id="create_button" type="button" onclick="addUserToDb()">Create</button>
 						<button id="del_button" type="button" onclick="dtor_client()" disabled=true>Destroy</button>
 						<button id="dis_button" type="button" onclick="forceDisconnect()" >Disconnect</button>
 					</td></tr><tr><td>

@@ -106,7 +106,7 @@ export const routeCreateNewUser = async (req: Request, res: Response) => {
 
     db.close(); //closing connection
     if (createdUser) {
-      return res.status(200).json({
+      return res.status(201).json({
         username: createdUser.username,
         webrtcToken: createdUser.webrtcToken,
         webrtcAccessKey: WEBRTC_REGISTRATION.WEBRTC_ACCESS_KEY,

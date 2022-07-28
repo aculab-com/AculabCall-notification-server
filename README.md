@@ -99,6 +99,12 @@ Install dependencies
 npm install
 ```
 
+Build WebRTC Demo for testing
+
+```terminal
+npm run build-webrtc-demo
+```
+
 To run the server use run bellow command from root folder
 
 ```terminal
