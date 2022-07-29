@@ -517,37 +517,42 @@
 	async function addUserToDb() {
 		username = document.getElementById("clientId").value;
 		platform = 'web';
-		data = {"username": username, "platform": platform}
+		headers = {
+			'Accept': 'application/json',
+			'Content-Type': 'application/json',
+		};
+		body = JSON.stringify({
+			"username": username,
+			"platform": platform
+		})
 
 		response = await fetch('/users',{
 			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify(data)
+			headers: headers,
+			body: body
 		})
 		if (response.status !== 201) {
-			console.log('111', response);
 			window.alert(`Client ID ${username} is already registered`);
 		} else {
 			make_client()
 		}
 	}
 
-		// delete user from the server DB
+	// delete user from the server DB
 	async function deleteUserFromDb() {
 		username = document.getElementById("clientId").value;
-		data = {"username": username}
+		headers = {
+			'Accept': 'application/json',
+			'Content-Type': 'application/json',
+		};
+		body = JSON.stringify({"username": username})
 
 		response = await fetch('/users',{
 			method: 'DELETE',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify(data)
+			headers: headers,
+			body: body
 		})
 		if (response.status !== 200) {
-			console.log('111', response);
 			window.alert(`Client ID ${username} was not deleted from DB, it may not exist within the DB`);
 		}
 	}
@@ -683,7 +688,7 @@
 			console.error('There has been a problem with your fetch operation:', error);
 		});
 	}
-	
+
 	function forceDisconnect() {
 		acc.closeConnection();
 	}
