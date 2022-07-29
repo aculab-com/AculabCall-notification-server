@@ -14,6 +14,7 @@
 		['d', {'call': null, 'inbound':false, 'connected':false, 'player':null, 'playing_ringing':false, 'gotremotestream':false}],
 	]);
 	var statsTimer = null;
+
 	function startStats() {
 		statsTimer = setInterval(()=>{
 			for (const [key, value] of slots.entries()) {
@@ -28,6 +29,7 @@
 			}
 		}, 1000);
 	}
+
 	function stopStats() {
 		if (statsTimer) {
 			clearInterval(statsTimer);
@@ -38,6 +40,7 @@
 			}
 		}
 	}
+
 	function configDtmfButtons(slot, enabled) {
 		var dtmf_table = document.getElementById(slot + '-dtmf-buttons');
 		var buttons = dtmf_table.getElementsByTagName('button');
@@ -45,6 +48,7 @@
 			buttons.item(i).disabled = !enabled;
 		}
 	}
+
 	function gotmedia(slot, obj) {
 		var slot_obj = slots.get(slot);
 		var player = slot_obj.player;
@@ -70,6 +74,7 @@
 			}
 		}
 	}
+
 	function handle_disconnect(slot, cause) {
 		var slot_obj = slots.get(slot);
 		slot_obj.connected=false;
@@ -102,11 +107,13 @@
 		document.getElementById(slot + "-target").disabled = false;
 		configDtmfButtons(slot, false);
 	}
+
 	function call_disconnected(slot, obj) {
 		var slot_obj = slots.get(slot);
 		slot_obj.call = null;
 		handle_disconnect(slot, obj.cause);
 	}
+
 	function connecting(slot, obj) {
 		var slot_obj = slots.get(slot);
 		document.getElementById(slot + "-state").value = "Connecting";
@@ -118,6 +125,7 @@
 			p.catch(error => {});
 		}
 	}
+
 	function ringing(slot) {
 		var slot_obj = slots.get(slot);
 		document.getElementById(slot + "-state").value = "Ringing";
@@ -140,6 +148,7 @@
 			slot_obj.playing_ringing = true;
 		}
 	}
+
 	function connected(slot) {
 		var slot_obj = slots.get(slot);
 		slot_obj.connected=true;
@@ -155,9 +164,11 @@
 		document.getElementById(slot + "-mute-outv").disabled = false;
 		configDtmfButtons(slot, true);
 	}
+
 	function handle_error(slot, obj) {
 		handle_disconnect(slot, obj.error);
 	}
+
 	function mute_call(slot) {
 		var slot_obj = slots.get(slot);
 		if (slot_obj.call) {
@@ -329,6 +340,7 @@
 			document.getElementById(slot + "-stop_button").disabled = false;
 		}
 	}
+
 	function stop_call(slot) {
 		var slot_obj = slots.get(slot);
 		console.log("stopping call");
@@ -343,6 +355,7 @@
 		document.getElementById(slot + "-stop_button").disabled = true;
 		configDtmfButtons(slot, false);
 	}
+
 	function send_dtmf(slot, dtmf) {
 		var slot_obj = slots.get(slot);
 		if (slot_obj.call) {
@@ -350,6 +363,7 @@
 			slot_obj.call.sendDtmf(dtmf);
 		}
 	}
+
 	function handleVideoMuteUnmute(slot, loc, change, obj) {
 		console.log("slot " + slot + ": " + loc + " video " + change + " [call: " + obj.call + ", stream: " + obj.stream + ", track: " + obj.track);
 		if (loc == "remote") {
@@ -362,6 +376,7 @@
 			}
 		}
 	}
+
 	function new_call(obj) {
 		var slot = '';
 		var slot_obj = null;
@@ -421,6 +436,7 @@
 		}
 		slot_obj.call.ringing();
 	}
+
 	function incomingState(state) {
 		if (state.ready) {
 			//document.getElementById("unreg_button").disabled = false;
@@ -434,6 +450,7 @@
 			document.getElementById("reg_state").value = reg_state
 		}
 	}
+
 	function register() {
 		token = document.getElementById("token").value;
 		if (acc) {
@@ -451,6 +468,7 @@
 			document.getElementById("reg_state").value = "Client not found";
 		}
 	}
+
 	function unregister() {
 		if (acc) {
 			acc.disableIncoming();
@@ -461,6 +479,7 @@
 			document.getElementById("reg_state").value = "No cloud client";
 		}
 	}
+
 	function start_client(cloud, webRtcAccessKey, clientId, logLevel) {
 		if (acc) {
 			return;
@@ -575,6 +594,7 @@
 			set_codec_selector(s, 'video');
 		}
 	}
+
 	function dtor_client() {
 		// TODO do we need a client stop function to kill all calls/registration
 		// or should this only be allowed when no calls are present and incoming is disabled
@@ -607,6 +627,7 @@
 			document.getElementById(s + '-start_button').disabled = true;
 		}
 	}
+
 	function handleCloudSelect() {
 		cloudObj = document.getElementById("cloud");
 		other_obj = document.getElementById("cloud-other");
@@ -617,6 +638,7 @@
 			other_obj.disabled = cloudObj.disabled;
 		}
 	}
+
 	function get_token() {
 		cloudObj = document.getElementById("cloud");
 		cloud = cloudObj.value
@@ -661,6 +683,7 @@
 			console.error('There has been a problem with your fetch operation:', error);
 		});
 	}
+	
 	function forceDisconnect() {
 		acc.closeConnection();
 	}
