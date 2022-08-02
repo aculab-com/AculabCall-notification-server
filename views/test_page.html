@@ -572,7 +572,6 @@
 	async function sendCallNotification(slot) {
 		type = document.getElementById(slot + "-target-type").value;
 		if (type === 'client') {
-			console.log('1111 type', type);
 			url = 'notifications/call';
 			uuid = create_UUID();
 			caller = document.getElementById("clientId").value
@@ -603,8 +602,9 @@
 					console.error('[ sendCallNotification ]', error.message);
 				});
 			if (response.message === 'success') {
-				console.log('1111 response', response);
 				setTimeout(() => {start_call(slot)}, 5000);
+			} else if (response.error) {
+				window.alert(`Cannot make the call: ${response.error}`);
 			}
 		} else {
 			start_call(slot)

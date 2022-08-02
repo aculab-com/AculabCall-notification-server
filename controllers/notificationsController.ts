@@ -10,6 +10,8 @@ import type { UsersData, User, Notification } from '../types/types';
 import { NOTIFICATIONS } from '../constants';
 import { connectDb, getUser } from '../middleware/dbHandler';
 
+let callOut = false;
+
 /**
  * send call notification ios/android
  * @param {Request} req request from route (requires uuid, caller and callee)
@@ -44,7 +46,20 @@ export const newCallNotification = async (
       return err
     });
 
+    const caller: User | undefined = await getUser(db, notification.caller)
+    .then(data => {
+      return data
+    })
+    .catch(err => {
+      console.error(err);
+      return err
+    });
+
   db.close(); //closing connection
+
+  if (caller?.platform === 'web') {
+    callOut = true
+  }
 
   if (
     !callee ||
@@ -139,12 +154,12 @@ export const newNotification = async (
 
   db.close(); //closing connection
   
-  if (!receivingUser || !receivingUser.fcmDeviceToken) {
+  if (!receivingUser || (!receivingUser.fcmDeviceToken && receivingUser.platform !== 'web')) {
     return res
       .status(400)
       .json({ message: `caller ${notification.caller} is not registered` });
   }
-
+  
   let notificationResponse;
   switch (receivingUser.platform) {
     case 'ios':
@@ -172,6 +187,12 @@ export const newNotification = async (
     default:
       // call is not ios or android, must be web browser
       // TODO deal with webBrowser option
+      if (notification.webrtc_ready === true) {
+        console.log('Place the WebRTC call now');
+      } else if (notification.call_rejected === true) {
+        console.log('Display that the call was rejected');
+      }
+      callOut = false
       return res.status(200).json({ message: 'calling_web_interface' });
   }
 
