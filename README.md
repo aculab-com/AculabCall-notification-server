@@ -105,6 +105,15 @@ Build WebRTC Demo for testing
 npm run build-webrtc-demo
 ```
 
+set up sockets for communication between the server and webrtc-demo-client:  
+in root folder in server.ts file edit CLIENT_URL to hold webrtc-demo-client url.
+
+for example:
+
+```typescript
+const CLIENT_URL = 'http://localhost:3000';
+```
+
 To run the server use run bellow command from root folder
 
 ```terminal

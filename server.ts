@@ -12,6 +12,8 @@ import users from './routes/api/users';
 import notifications from './routes/api/notifications';
 import { connectDb } from './middleware/dbHandler';
 
+const CLIENT_URL = 'http://localhost:3000';
+
 const db = connectDb();
 
 db.serialize(function () {
@@ -73,7 +75,7 @@ const server = app.listen(PORT, () =>
 
 const io = new Server(server, {
   cors: {
-    origin: 'http://localhost:3000'
+    origin: CLIENT_URL
   }
 });
 
