@@ -1,6 +1,7 @@
 import express, { Express } from 'express';
 import path from 'path';
 import cors from 'cors';
+import { Server, Socket } from 'socket.io';
 
 import corsOptions from './config/cordOptions';
 import { logger } from './middleware/logEvents';
@@ -13,12 +14,12 @@ import { connectDb } from './middleware/dbHandler';
 
 const db = connectDb();
 
-db.serialize(function() {
+db.serialize(function () {
   // create users table if it does not exist
   db.run(
     'CREATE TABLE IF NOT EXISTS users(username, webrtcToken, platform, fcmDeviceToken, iosDeviceToken)'
   );
-})
+});
 db.close();
 
 const PORT = process.env.PORT || 3500;
@@ -28,7 +29,10 @@ const app: Express = express();
 // custom middleware logger
 app.use(logger);
 
-app.use('/aculab_webrtc', express.static(__dirname + '/node_modules/aculab-webrtc'));
+app.use(
+  '/aculab_webrtc',
+  express.static(__dirname + '/node_modules/aculab-webrtc')
+);
 app.use('/root', express.static(__dirname + '/'));
 
 // Cross Origin Resource Sharing
@@ -63,4 +67,27 @@ app.all('*', (req, res) => {
 
 app.use(errorHandler);
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+const server = app.listen(PORT, () =>
+  console.log(`Server running on port ${PORT}`)
+);
+
+const io = new Server(server, {
+  cors: {
+    origin: 'http://localhost:3000'
+  }
+});
+
+io.on ('connection', (socket: Socket) => {
+  console.log('socket.io id:', socket.id);
+
+  socket.on('register', (data: any) => {
+    socket.join(data);
+    console.log('socket.io registered data:', data);
+
+    socket.emit('response', 'got the data');
+  })
+
+  socket.on('disconnect', () => {
+    console.log('socket.id: user disconnected');
+  });
+});
