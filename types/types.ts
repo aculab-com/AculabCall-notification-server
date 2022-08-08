@@ -4,6 +4,7 @@ export interface User {
   fcmDeviceToken?: string;
   iosDeviceToken?: string;
   platform?: string;
+  logLevel?: string | number;
 }
 
 export interface UsersData {

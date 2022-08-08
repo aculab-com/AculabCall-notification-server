@@ -11,6 +11,7 @@ import root from './routes/root';
 import users from './routes/api/users';
 import notifications from './routes/api/notifications';
 import { connectDb } from './middleware/dbHandler';
+import { socketCreateNewUser } from './controllers/usersController';
 
 const CLIENT_URL = 'http://localhost:3000';
 
@@ -82,11 +83,14 @@ const io = new Server(server, {
 io.on ('connection', (socket: Socket) => {
   console.log('socket.io id:', socket.id);
 
-  socket.on('register', (data: any) => {
+  socket.on('register', async (data: any) => {
     socket.join(data);
     console.log('socket.io registered data:', data);
+    const userCreated = await socketCreateNewUser(data);
 
-    socket.emit('response', 'got the data');
+    if (userCreated) {
+      socket.emit('register_user_response', userCreated);
+    }
   })
 
   socket.on('disconnect', () => {

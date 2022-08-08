@@ -276,3 +276,78 @@ export const routeDeleteUser = async (req: Request, res: Response) => {
   }
   return res.status(400).json({error: `user ${req.body.username} was not found`});
 };
+
+/**
+ * creates user if the username is free
+ * also it assigns webRTC Token
+ * @param {User} user user object (requires username)
+ * @returns object with information about new user created or error
+ */
+ export const socketCreateNewUser = async (user: User) => {
+  console.log('socketCreateNewUser', user);
+  let response;
+  if (!user.username) {
+    return { message: 'username is required' };
+  };
+  if (!user.logLevel) {
+    return { message: 'logLevel is required' };
+  };
+
+  const db = connectDb();
+  // check if user exist
+  const existingUser = await getUser(db, user.username)
+    .then(data => {
+      return data
+    })
+    .catch(err => {
+      console.error(err);
+      return err
+    });
+
+  if (existingUser) {
+    db.close(); //closing connection
+    return { message: 'username already exists' };
+  }
+
+  const newUser: User = {
+    username: user.username,
+    fcmDeviceToken: user.fcmDeviceToken,
+    iosDeviceToken: user.iosDeviceToken,
+    platform: 'web',
+  };
+
+  const webRtcToken = await getToken({
+    registerClientId: newUser.username,
+    tokenLifeTime: WEBRTC_REGISTRATION.TOKEN_LIFE_TIME,
+    enableIncomingCall: WEBRTC_REGISTRATION.ENABLE_INCOMING_CALL,
+    callClientRange: WEBRTC_REGISTRATION.CALL_CLIENT_RANGE,
+    cloudRegionId: WEBRTC_REGISTRATION.CLOUD_REGION_ID,
+    cloudUsername: WEBRTC_REGISTRATION.CLOUD_USER_NAME,
+    apiAccessKey: WEBRTC_REGISTRATION.API_ACCESS_KEY,
+  });
+
+  if (webRtcToken) {
+    newUser.webrtcToken = webRtcToken;
+
+    const createdUser: any = await createNewUser(db, newUser)
+    .then(data => {
+      return data
+    })
+    .catch(err => {
+      console.error(err);
+      return err
+    });
+
+    db.close(); //closing connection
+    if (createdUser) {
+      return {
+        username: createdUser.username,
+        webrtcToken: createdUser.webrtcToken,
+        webrtcAccessKey: WEBRTC_REGISTRATION.WEBRTC_ACCESS_KEY,
+        cloudRegionId: WEBRTC_REGISTRATION.CLOUD_REGION_ID,
+        logLevel: user.logLevel
+      };
+    }
+  return { message: 'user not created' };
+  }
+};
