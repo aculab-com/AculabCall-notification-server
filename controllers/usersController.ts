@@ -351,3 +351,32 @@ export const routeDeleteUser = async (req: Request, res: Response) => {
   return { message: 'user not created' };
   }
 };
+
+/**
+ * delete user from database
+ * @param {Request} req request from route (requires username)
+ * @param {Response} res response to route
+ * @returns information if user was or was not deleted
+ */
+ export const socketDeleteUser = async (username: string) => {
+
+  const db = connectDb();
+
+  const existingUser = await getUser(db, username)
+    .then(data => {
+      if (data) {
+        deleteUser(db, username)
+      }
+      return data
+    })
+    .catch(err => {
+      console.error(err);
+      return err
+    });
+
+  db.close(); //closing connection
+  if (existingUser) {
+    return { message: 'user deleted' };
+  }
+  return { message: 'user not deleted' };
+};
