@@ -12,6 +12,7 @@ import users from './routes/api/users';
 import notifications from './routes/api/notifications';
 import { connectDb } from './middleware/dbHandler';
 import { socketCreateNewUser, socketDeleteUser } from './controllers/usersController';
+import { notificationEvent, socketNewCallNotification } from './controllers/notificationsController';
 
 const CLIENT_URL = 'http://localhost:3000';
 
@@ -39,7 +40,8 @@ app.use(
 app.use('/root', express.static(__dirname + '/'));
 
 // Cross Origin Resource Sharing
-app.use(cors(corsOptions));
+// app.use(cors(corsOptions));
+app.use(cors());
 
 // built-in middleware to handle urlencoded data
 // in other words, form data:
@@ -76,7 +78,7 @@ const server = app.listen(PORT, () =>
 
 const io = new Server(server, {
   cors: {
-    origin: CLIENT_URL
+    origin: '*'
   }
 });
 
@@ -89,18 +91,34 @@ io.on ('connection', (socket: Socket) => {
     const userCreated = await socketCreateNewUser(data);
 
     if (userCreated) {
+      console.log('111111111')
       socket.emit('register_user_response', userCreated);
     }
-  })
+  });
 
   socket.on('unregister_user', async (username: string) => {
-    socket.join(username);
+    // socket.join(username);
     console.log('socket.io unregister user:', username);
     const response = await socketDeleteUser(username);
 
     if (response) {
       socket.emit('unregister_user_response', response);
     }
+  });
+
+  socket.on('call_notification', async (data) => {
+    console.log('call_notification from socket', data);
+    const response = await socketNewCallNotification(data);
+
+    if (response) {
+      socket.emit('call_notification_response', response);
+    }
+  });
+
+  const notListener = notificationEvent.addListener('silent_notification', data => {
+    console.log('server silent notification emitted data', data);
+    socket.emit('silent_notification', data);
+    notListener.removeListener('silent_notification', () => {});
   })
 
   socket.on('disconnect', () => {

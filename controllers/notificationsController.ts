@@ -5,12 +5,14 @@ import {
   sendNotificationAndroid,
   sendNotificationIos,
 } from '../middleware/notificationHandler';
-import type { UsersData, User, Notification } from '../types/types';
-
 import { NOTIFICATIONS } from '../constants';
 import { connectDb, getUser } from '../middleware/dbHandler';
+import EventEmitter from 'events';
 
-let callOut = false;
+import type { UsersData, User, Notification } from '../types/types';
+
+// let callOut = false;
+export const notificationEvent = new EventEmitter();
 
 /**
  * send call notification ios/android
@@ -46,20 +48,20 @@ export const newCallNotification = async (
       return err
     });
 
-    const caller: User | undefined = await getUser(db, notification.caller)
-    .then(data => {
-      return data
-    })
-    .catch(err => {
-      console.error(err);
-      return err
-    });
+    // const caller: User | undefined = await getUser(db, notification.caller)
+    // .then(data => {
+    //   return data
+    // })
+    // .catch(err => {
+    //   console.error(err);
+    //   return err
+    // });
 
   db.close(); //closing connection
 
-  if (caller?.platform === 'web') {
-    callOut = true
-  }
+  // if (caller?.platform === 'web') {
+  //   callOut = true
+  // }
 
   if (
     !callee ||
@@ -187,12 +189,13 @@ export const newNotification = async (
     default:
       // call is not ios or android, must be web browser
       // TODO deal with webBrowser option
+      notificationEvent.emit('silent_notification', notification);
       if (notification.webrtc_ready === true) {
         console.log('Place the WebRTC call now');
       } else if (notification.call_rejected === true) {
         console.log('Display that the call was rejected');
       }
-      callOut = false
+      // callOut = false
       return res.status(200).json({ message: 'calling_web_interface' });
   }
 
@@ -204,5 +207,77 @@ export const newNotification = async (
     }
   } catch (err) {
     console.error('FCM response error:', err);
+  }
+};
+
+export const socketNewCallNotification = async (
+  notification: Notification
+): Promise<any> => {
+  console.log('socketNewCallNotification', notification);
+
+  if (!notification.uuid || !notification.caller || !notification.callee) {
+    return { message: 'uuid, caller and callee are required' };
+  }
+
+  const db = connectDb();
+  const callee: User | undefined = await getUser(db, notification.callee)
+    .then(data => {
+      return data
+    })
+    .catch(err => {
+      console.error(err);
+      return err
+    });
+
+    // const caller: User | undefined = await getUser(db, notification.caller)
+    // .then(data => {
+    //   return data
+    // })
+    // .catch(err => {
+    //   console.error(err);
+    //   return err
+    // });
+
+  db.close(); //closing connection
+
+  // if (caller?.platform === 'web') {
+  //   callOut = true
+  // }
+
+  if (
+    !callee ||
+    (callee.platform !== 'web' && !callee.fcmDeviceToken) ||
+    (callee.platform === 'ios' && !callee.iosDeviceToken)
+  ) {
+    return { message: `callee ${notification.callee} is not in the database` };
+  }
+
+  let notificationResponse;
+  switch (callee.platform) {
+    case 'ios':
+      notificationResponse = await sendCallNotificationIos({
+        uuid: notification.uuid,
+        caller: notification.caller,
+        iosDeviceToken: callee.iosDeviceToken,
+        bundle: `${NOTIFICATIONS.IOS_BUNDLE}.voip`,
+      });
+      break;
+    case 'android':
+      notificationResponse = await sendCallNotificationAndroid({
+        uuid: notification.uuid,
+        caller: notification.caller,
+        fcmDeviceToken: callee.fcmDeviceToken,
+        bundle: `${NOTIFICATIONS.IOS_BUNDLE}.voip`,
+      });
+      break;
+    default:
+      // call is not ios or android, must be web browser
+      // TODO deal with webBrowser option
+      return { message: 'calling_web_interface' };
+  }
+  console.log('notification', notificationResponse);
+
+  if (notificationResponse) {
+    return { message: notificationResponse };
   }
 };
