@@ -9,7 +9,7 @@ import { NOTIFICATIONS } from '../constants';
 import { connectDb, getUser } from '../middleware/dbHandler';
 import EventEmitter from 'events';
 
-import type { UsersData, User, Notification } from '../types/types';
+import type { User, Notification } from '../types/types';
 
 // let callOut = false;
 export const notificationEvent = new EventEmitter();
@@ -24,7 +24,7 @@ export const newCallNotification = async (
   req: Request,
   res: Response
 ): Promise<any> => {
-  console.log('newCallNotification', req.body);
+  // console.log('newCallNotification', req.body);
 
   const notification: Notification = {
     uuid: req.body.uuid,
@@ -48,20 +48,7 @@ export const newCallNotification = async (
       return err
     });
 
-    // const caller: User | undefined = await getUser(db, notification.caller)
-    // .then(data => {
-    //   return data
-    // })
-    // .catch(err => {
-    //   console.error(err);
-    //   return err
-    // });
-
   db.close(); //closing connection
-
-  // if (caller?.platform === 'web') {
-  //   callOut = true
-  // }
 
   if (
     !callee ||
@@ -92,11 +79,10 @@ export const newCallNotification = async (
       });
       break;
     default:
-      // call is not ios or android, must be web browser
-      // TODO deal with webBrowser option
+      // web browser
       return res.status(200).json({ message: 'calling_web_interface' });
   }
-  console.log('notification', notificationResponse);
+  // console.log('notification', notificationResponse);
 
   if (notificationResponse === 'success') {
     res.status(200).json({ message: notificationResponse });
@@ -115,7 +101,7 @@ export const newNotification = async (
   req: Request,
   res: Response
 ): Promise<any> => {
-  console.log('newNotification', req.body);
+  // console.log('newNotification', req.body);
   let receivingUser: User | undefined
 
   const notification: Notification = {
@@ -187,15 +173,14 @@ export const newNotification = async (
       });
       break;
     default:
-      // call is not ios or android, must be web browser
-      // TODO deal with webBrowser option
+      // web browser
+      // send data to the browser client via socket
       notificationEvent.emit('silent_notification', notification);
       if (notification.webrtc_ready === true) {
         console.log('Place the WebRTC call now');
       } else if (notification.call_rejected === true) {
         console.log('Display that the call was rejected');
       }
-      // callOut = false
       return res.status(200).json({ message: 'calling_web_interface' });
   }
 
@@ -210,6 +195,11 @@ export const newNotification = async (
   }
 };
 
+/**
+ * send a notification to iOS or Android from web browser
+ * @param {Notification} notification notification object
+ * @returns object with message
+ */
 export const socketNewCallNotification = async (
   notification: Notification
 ): Promise<any> => {
@@ -229,20 +219,7 @@ export const socketNewCallNotification = async (
       return err
     });
 
-    // const caller: User | undefined = await getUser(db, notification.caller)
-    // .then(data => {
-    //   return data
-    // })
-    // .catch(err => {
-    //   console.error(err);
-    //   return err
-    // });
-
   db.close(); //closing connection
-
-  // if (caller?.platform === 'web') {
-  //   callOut = true
-  // }
 
   if (
     !callee ||
@@ -271,13 +248,104 @@ export const socketNewCallNotification = async (
       });
       break;
     default:
-      // call is not ios or android, must be web browser
-      // TODO deal with webBrowser option
+      // web browser
+      // TODO ??
       return { message: 'calling_web_interface' };
   }
-  console.log('notification', notificationResponse);
+  // console.log('notification', notificationResponse);
 
   if (notificationResponse) {
     return { message: notificationResponse };
+  }
+};
+
+/**
+ * send a silent notification ios/android
+ * @param {Notification} data notification data object
+ * @returns information about sent notification 
+ */
+ export const socketNewNotification = async (data: Notification): Promise<any> => {
+  // console.log('socketNewNotification', data);
+  let receivingUser: User | undefined
+
+  const notification: Notification = {
+    uuid: data.uuid,
+    caller: data.caller,
+    callee: data.callee,
+    webrtc_ready: data.webrtc_ready,
+    call_rejected: data.call_rejected,
+    call_cancelled: data.call_cancelled,
+  };
+  if (!notification.uuid || !notification.caller || !notification.callee) {
+    return { message: 'uuid, caller and callee are required' };
+  }
+
+  const db = connectDb();
+  if (data.call_cancelled) {
+    receivingUser = await getUser(db, notification.callee)
+    .then(data => {
+      return data
+    })
+    .catch(err => {
+      console.error(err);
+      return err
+    });
+  } else {
+    receivingUser = await getUser(db, notification.caller)
+    .then(data => {
+      return data
+    })
+    .catch(err => {
+      console.error(err);
+      return err
+    });
+  }
+  
+
+  db.close(); //closing connection
+  
+  if (!receivingUser || (!receivingUser.fcmDeviceToken && receivingUser.platform !== 'web')) {
+    return { message: `caller ${notification.caller} is not registered` };
+  }
+  
+  let notificationResponse;
+  switch (receivingUser.platform) {
+    case 'ios':
+      notificationResponse = await sendNotificationIos({
+        uuid: notification.uuid,
+        callee: notification.callee,
+        fcmDeviceToken: receivingUser.fcmDeviceToken,
+        bundle: NOTIFICATIONS.ANDROID_BUNDLE,
+        webrtc_ready: notification.webrtc_ready,
+        call_rejected: notification.call_rejected,
+        call_cancelled: notification.call_cancelled,
+      });
+      break;
+    case 'android':
+      notificationResponse = await sendNotificationAndroid({
+        uuid: notification.uuid,
+        callee: notification.callee,
+        fcmDeviceToken: receivingUser.fcmDeviceToken,
+        bundle: NOTIFICATIONS.ANDROID_BUNDLE,
+        webrtc_ready: notification.webrtc_ready,
+        call_rejected: notification.call_rejected,
+        call_cancelled: notification.call_cancelled,
+      });
+      break;
+    default:
+      notificationResponse = {success: 1, message: 'sent to web browser'}
+      // web browser
+      // TODO deal with webBrowser option
+      notificationEvent.emit('silent_notification', notification);
+  }
+
+  try {
+    if (notificationResponse.success > 0 ) {
+      return { message: notificationResponse };
+      } else {
+      return { message: notificationResponse } ;
+    }
+  } catch (err) {
+    console.error('FCM response error:', err);
   }
 };
