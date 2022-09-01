@@ -24,8 +24,6 @@ export const newCallNotification = async (
   req: Request,
   res: Response
 ): Promise<any> => {
-  // console.log('newCallNotification', req.body);
-
   const notification: Notification = {
     uuid: req.body.uuid,
     caller: req.body.caller,
@@ -82,7 +80,6 @@ export const newCallNotification = async (
       // web browser
       return res.status(200).json({ message: 'calling_web_interface' });
   }
-  // console.log('notification', notificationResponse);
 
   if (notificationResponse === 'success') {
     res.status(200).json({ message: notificationResponse });
@@ -101,7 +98,6 @@ export const newNotification = async (
   req: Request,
   res: Response
 ): Promise<any> => {
-  // console.log('newNotification', req.body);
   let receivingUser: User | undefined
 
   const notification: Notification = {
@@ -138,9 +134,7 @@ export const newNotification = async (
       return err
     });
   }
-  
-
-  db.close(); //closing connection
+  db.close(); //closing db connection
   
   if (!receivingUser || (!receivingUser.fcmDeviceToken && receivingUser.platform !== 'web')) {
     return res
@@ -203,8 +197,6 @@ export const newNotification = async (
 export const socketNewCallNotification = async (
   notification: Notification
 ): Promise<any> => {
-  console.log('socketNewCallNotification', notification);
-
   if (!notification.uuid || !notification.caller || !notification.callee) {
     return { message: 'uuid, caller and callee are required' };
   }
@@ -218,8 +210,7 @@ export const socketNewCallNotification = async (
       console.error(err);
       return err
     });
-
-  db.close(); //closing connection
+  db.close(); // closing db connection
 
   if (
     !callee ||
@@ -249,10 +240,8 @@ export const socketNewCallNotification = async (
       break;
     default:
       // web browser
-      // TODO ??
       return { message: 'calling_web_interface' };
   }
-  // console.log('notification', notificationResponse);
 
   if (notificationResponse) {
     return { message: notificationResponse };
@@ -265,7 +254,6 @@ export const socketNewCallNotification = async (
  * @returns information about sent notification 
  */
  export const socketNewNotification = async (data: Notification): Promise<any> => {
-  // console.log('socketNewNotification', data);
   let receivingUser: User | undefined
 
   const notification: Notification = {
@@ -300,9 +288,7 @@ export const socketNewCallNotification = async (
       return err
     });
   }
-  
-
-  db.close(); //closing connection
+  db.close(); // closing db connection
   
   if (!receivingUser || (!receivingUser.fcmDeviceToken && receivingUser.platform !== 'web')) {
     return { message: `caller ${notification.caller} is not registered` };
@@ -335,15 +321,14 @@ export const socketNewCallNotification = async (
     default:
       notificationResponse = {success: 1, message: 'sent to web browser'}
       // web browser
-      // TODO deal with webBrowser option
       notificationEvent.emit('silent_notification', notification);
   }
 
   try {
     if (notificationResponse.success > 0 ) {
-      return { message: notificationResponse };
+      return { message: 'success' };
       } else {
-      return { message: notificationResponse } ;
+      return { message: 'error occurred' } ;
     }
   } catch (err) {
     console.error('FCM response error:', err);

@@ -28,6 +28,7 @@ import {
   User,
 } from './types/types';
 
+// front end app url
 const CLIENT_URL = 'http://localhost:3000';
 
 const db = connectDb();
@@ -40,6 +41,7 @@ db.serialize(function () {
 });
 db.close();
 
+// server port
 const PORT = process.env.PORT || 3500;
 const app: Express = express();
 // express works like a waterfall, therefore higher lines of code are executed before lower lines of code
@@ -90,7 +92,7 @@ const server = app.listen(PORT, () =>
   console.log(`Server running on port ${PORT}`)
 );
 
-// create is server
+// create io server/socket
 const io = new Server(server, {
   cors: {
     origin: '*',
@@ -99,11 +101,10 @@ const io = new Server(server, {
 
 // io socket connected
 io.on('connection', (socket: Socket) => {
-  console.log('socket.io id:', socket.id);
+  console.log('connected socket.io id:', socket.id);
 
   // register user received via socket.io
   socket.on('register', async (newUser: User, callBack) => {
-    // console.log('socket.io registered data:', newUser);
     const userCreated = await socketCreateNewUser(newUser);
     let data: RegResponse;
 
@@ -125,13 +126,11 @@ io.on('connection', (socket: Socket) => {
         data: { message: 'User not created' },
       };
     }
-    // return response 
     callBack(data);
   });
 
   // unregister user received via socket.io
   socket.on('unregister_user', async (username: string, callBack) => {
-    console.log('socket.io unregister user:', username);
     const response = await socketDeleteUser(username);
     let data: unRegResponse;
 
@@ -146,7 +145,6 @@ io.on('connection', (socket: Socket) => {
         message: 'user not deleted',
       };
     }
-    // return response
     callBack(data);
   });
 
@@ -154,7 +152,6 @@ io.on('connection', (socket: Socket) => {
   socket.on(
     'call_notification',
     async (callNotification: CallNotification, callBack) => {
-      // console.log('call_notification from socket', callNotification);
       const response: { message: string } = await socketNewCallNotification(
         callNotification
       );
@@ -170,14 +167,12 @@ io.on('connection', (socket: Socket) => {
   // transmit via socket.io, used for letting browser know that iOS or Android
   // WebRTC module is ready to receive WebRTC call
   notificationEvent.on('silent_notification', (data) => {
-    // console.log('server silent notification emitted data', data);
     socket.emit('silent_notification', data);
   });
 
   // send cancel call notification to ios/android
   // used when call canceled in browser before WebRTC connection is established
   socket.on('call_canceled', async (data: OutboundCall, callBack) => {
-    // console.log('call_canceled emitted data', data);
     const result = await socketNewNotification(data);
 
     if (result) {
@@ -188,6 +183,6 @@ io.on('connection', (socket: Socket) => {
   // disconnect the socket
   socket.on('disconnect', () => {
     notificationEvent.removeAllListeners();
-    console.log('socket.id: user disconnected');
+    console.log('socket.io: user disconnected');
   });
 });

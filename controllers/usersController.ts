@@ -45,8 +45,8 @@ export const routeGetUser = async (req: Request, res: Response) => {
       console.error(err);
       return err;
     });
+  db.close(); // closing db connection
 
-  db.close(); //closing connection
   if (user) {
     return res.status(200).json(user);
   } else {
@@ -81,7 +81,7 @@ export const routeCreateNewUser = async (req: Request, res: Response) => {
     });
 
   if (existingUser) {
-    db.close(); //closing connection
+    db.close(); // closing db connection
     return res.status(400).json({ message: 'username already exists' });
   }
 
@@ -113,8 +113,8 @@ export const routeCreateNewUser = async (req: Request, res: Response) => {
         console.error(err);
         return err;
       });
+    db.close(); // closing db connection
 
-    db.close(); //closing connection
     if (createdUser) {
       return res.status(201).json({
         username: createdUser.username,
@@ -155,7 +155,7 @@ export const refreshWebrtcToken = async (req: Request, res: Response) => {
     });
 
   if (!existingUser) {
-    db.close(); //closing connection
+    db.close(); // closing db connection
     return res
       .status(400)
       .json({ message: `username ${req.body.username} not found` });
@@ -184,8 +184,8 @@ export const refreshWebrtcToken = async (req: Request, res: Response) => {
         console.error(err);
         return err;
       });
+    db.close(); // closing db connection
 
-    db.close(); //closing connection
     if (updatedUser) {
       return res.status(200).json({
         username: updatedUser.username,
@@ -228,7 +228,7 @@ export const routeUpdateUser = async (req: Request, res: Response) => {
     });
 
   if (!existingUser) {
-    db.close(); //closing connection
+    db.close(); // closing db connection
     return res
       .status(400)
       .json({ message: `username ${req.body.username} not found` });
@@ -251,8 +251,8 @@ export const routeUpdateUser = async (req: Request, res: Response) => {
       console.error(err);
       return err;
     });
+  db.close(); // closing db connection
 
-  db.close(); //closing connection
   if (updatedUser) {
     return res.status(200).json({ message: updatedUser });
   }
@@ -283,8 +283,8 @@ export const routeDeleteUser = async (req: Request, res: Response) => {
       console.error(err);
       return err;
     });
+  db.close(); // closing db connection
 
-  db.close(); //closing connection
   if (existingUser) {
     return res
       .status(200)
@@ -302,7 +302,6 @@ export const routeDeleteUser = async (req: Request, res: Response) => {
  * @returns object with information about new user created or error
  */
 export const socketCreateNewUser = async (user: User) => {
-  console.log('socketCreateNewUser', user);
   if (!user.username) {
     return { message: 'username is required' };
   }
@@ -322,7 +321,7 @@ export const socketCreateNewUser = async (user: User) => {
     });
 
   if (existingUser) {
-    db.close(); //closing connection
+    db.close(); // closing db connection
     return { message: 'username already exists' };
   }
 
@@ -354,8 +353,8 @@ export const socketCreateNewUser = async (user: User) => {
         console.error(err);
         return err;
       });
+    db.close(); // closing db connection
 
-    db.close(); //closing connection
     if (createdUser) {
       return {
         username: createdUser.username,
@@ -388,8 +387,8 @@ export const socketDeleteUser = async (username: string) => {
       console.error(err);
       return err;
     });
+  db.close(); // closing db connection
 
-  db.close(); //closing connection
   if (existingUser) {
     return { message: 'user deleted' };
   }
