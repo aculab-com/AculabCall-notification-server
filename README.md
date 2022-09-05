@@ -256,12 +256,12 @@ receiving data: an object
 
 ```ts
 {
-  username: string;
-  webrtcToken?: string; // not required
-  fcmDeviceToken?: string; // not required
-  iosDeviceToken?: string; // not required
-  platform?: string; // not required
-  logLevel?: string; // not required
+  username: string,
+  webrtcToken?: string, // not required
+  fcmDeviceToken?: string, // not required
+  iosDeviceToken?: string, // not required
+  platform?: string, // not required
+  logLevel?: string // not required
 }
 ```
 
@@ -310,9 +310,9 @@ receiving data: an object
 
 ```ts
 {
-  uuid: string;
-  caller: string;
-  callee: string;
+  uuid: string,
+  caller: string,
+  callee: string
 }
 ```
 
@@ -324,10 +324,10 @@ receiving data: an object
 
 ```ts
 {
-  uuid: string;
-  caller: string;
-  callee: string;
-  call_canceled: boolean;
+  uuid: string,
+  caller: string,
+  callee: string,
+  call_canceled: boolean
 }
 ```
 
