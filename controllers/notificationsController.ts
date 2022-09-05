@@ -190,7 +190,7 @@ export const newNotification = async (
 };
 
 /**
- * send a notification to iOS or Android from web browser
+ * send a call notification to ios/android
  * @param {Notification} notification notification object
  * @returns object with message
  */
@@ -249,7 +249,7 @@ export const socketNewCallNotification = async (
 };
 
 /**
- * send a silent notification ios/android
+ * send a silent notification to ios/android
  * @param {Notification} data notification data object
  * @returns information about sent notification 
  */

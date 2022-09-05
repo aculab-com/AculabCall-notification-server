@@ -22,6 +22,7 @@ import {
 } from './controllers/notificationsController';
 import {
   CallNotification,
+  Notification,
   OutboundCall,
   RegResponse,
   unRegResponse,
@@ -166,7 +167,7 @@ io.on('connection', (socket: Socket) => {
 
   // transmit via socket.io, used for letting browser know that iOS or Android
   // WebRTC module is ready to receive WebRTC call
-  notificationEvent.on('silent_notification', (data) => {
+  notificationEvent.on('silent_notification', (data: Notification) => {
     socket.emit('silent_notification', data);
   });
 

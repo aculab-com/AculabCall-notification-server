@@ -17,6 +17,14 @@ Please note that Firebase Cloud Messaging (FCM) notifications can be used for ca
     - [/users](#users)
     - [/users/user](#usersuser)
     - [/users/get_token](#usersget_token)
+  - [Sockets data](#sockets-data)
+    - [Emit data](#emit-data)
+      - ['silent_notification'](#silent_notification)
+    - [Receive data](#receive-data)
+      - ['register'](#register)
+      - ['unregister_user'](#unregister_user)
+      - ['call_notification'](#call_notification)
+      - ['call_canceled'](#call_canceled)
   - [Important Notes](#important-notes)
   - [Testing](#testing)
   - [Register/Login user workflow](#registerlogin-user-workflow)
@@ -106,7 +114,7 @@ npm run build-webrtc-demo
 ```
 
 set up sockets for communication between the server and webrtc-demo-client:  
-in root folder in server.ts file edit CLIENT_URL to hold webrtc-demo-client url.
+In root folder in server.ts file edit CLIENT_URL to hold webrtc-demo-client url:port
 
 for example:
 
@@ -192,6 +200,142 @@ request
 {
     "username": "user2",
     "platform": "ios"
+}
+```
+
+## Sockets data
+
+Sockets are user for communication between this server and [front end app](https://github.com/aculab-com/webrtc-demo-client).
+
+### Emit data
+
+example of emitting data:
+
+```ts
+socket.emit('silent_notification', data);
+```
+
+#### 'silent_notification'
+
+argument: an object
+
+```ts
+{
+  uuid: string,
+  caller: string,
+  callee: string,
+  webrtc_ready?: boolean, // not required
+  call_rejected?: boolean, // not required
+  call_cancelled?: boolean, // not required
+}
+```
+
+callback: no callback
+
+### Receive data
+
+example of receiving data:
+
+```ts
+socket.on('register', async (newUser: User, callBack) => {
+  // process received data
+  const userCreated = await socketCreateNewUser(newUser);
+
+  // send response via callback is present
+  if (userCreated) {
+      callBack('example: User created');
+  } else {
+    callBack('example: User not created');
+  }
+});
+```
+
+#### 'register'
+
+receiving data: an object
+
+```ts
+{
+  username: string;
+  webrtcToken?: string; // not required
+  fcmDeviceToken?: string; // not required
+  iosDeviceToken?: string; // not required
+  platform?: string; // not required
+  logLevel?: string; // not required
+}
+```
+
+callback:  
+if error returns an object
+
+```ts
+{
+  status: 'error',
+  data: {
+    message: string
+  }
+}
+```
+
+if success returns an object
+
+```ts
+{
+  status: 'userCreated',
+  data: {
+    username: string,
+    webrtcToken: string,
+    webrtcAccessKey: string,
+    cloudRegionId: string,
+    logLevel: string
+  }
+}
+```
+
+#### 'unregister_user'
+
+receiving data: username as string  
+callback: return an object  
+
+```ts
+{
+  status: string,
+  message: string
+}
+```
+
+#### 'call_notification'
+
+receiving data: an object
+
+```ts
+{
+  uuid: string;
+  caller: string;
+  callee: string;
+}
+```
+
+callback: returns a string message
+
+#### 'call_canceled'
+
+receiving data: an object
+
+```ts
+{
+  uuid: string;
+  caller: string;
+  callee: string;
+  call_canceled: boolean;
+}
+```
+
+callback: returns an object
+
+```ts
+{
+  message: string
 }
 ```
 
