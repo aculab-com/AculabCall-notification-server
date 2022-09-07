@@ -74,5 +74,5 @@ export interface OutboundCall {
   uuid: string;
   caller: string;
   callee: string;
-  call_canceled?: boolean;
+  call_cancelled?: boolean;
 }

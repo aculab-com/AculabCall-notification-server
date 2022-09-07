@@ -24,7 +24,7 @@ Please note that Firebase Cloud Messaging (FCM) notifications can be used for ca
       - ['register'](#register)
       - ['unregister_user'](#unregister_user)
       - ['call_notification'](#call_notification)
-      - ['call_canceled'](#call_canceled)
+      - ['call_cancelled'](#call_cancelled)
   - [Important Notes](#important-notes)
   - [Testing](#testing)
   - [Register/Login user workflow](#registerlogin-user-workflow)
@@ -318,7 +318,7 @@ receiving data: an object
 
 callback: returns a string message
 
-#### 'call_canceled'
+#### 'call_cancelled'
 
 receiving data: an object
 
@@ -327,7 +327,7 @@ receiving data: an object
   uuid: string,
   caller: string,
   callee: string,
-  call_canceled: boolean
+  call_cancelled: boolean
 }
 ```
 

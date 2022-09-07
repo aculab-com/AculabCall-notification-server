@@ -173,7 +173,7 @@ io.on('connection', (socket: Socket) => {
 
   // send cancel call notification to ios/android
   // used when call canceled in browser before WebRTC connection is established
-  socket.on('call_canceled', async (data: OutboundCall, callBack) => {
+  socket.on('call_cancelled', async (data: OutboundCall, callBack) => {
     const result = await socketNewNotification(data);
 
     if (result) {
