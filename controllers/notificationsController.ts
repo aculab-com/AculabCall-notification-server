@@ -149,7 +149,7 @@ export const newNotification = async (
         uuid: notification.uuid,
         callee: notification.callee,
         fcmDeviceToken: receivingUser.fcmDeviceToken,
-        bundle: NOTIFICATIONS.ANDROID_BUNDLE,
+        bundle: NOTIFICATIONS.IOS_BUNDLE,
         webrtc_ready: notification.webrtc_ready,
         call_rejected: notification.call_rejected,
         call_cancelled: notification.call_cancelled,
@@ -235,7 +235,7 @@ export const socketNewCallNotification = async (
         uuid: notification.uuid,
         caller: notification.caller,
         fcmDeviceToken: callee.fcmDeviceToken,
-        bundle: `${NOTIFICATIONS.IOS_BUNDLE}.voip`,
+        bundle: NOTIFICATIONS.ANDROID_BUNDLE,
       });
       break;
     default:
@@ -301,7 +301,7 @@ export const socketNewCallNotification = async (
         uuid: notification.uuid,
         callee: notification.callee,
         fcmDeviceToken: receivingUser.fcmDeviceToken,
-        bundle: NOTIFICATIONS.ANDROID_BUNDLE,
+        bundle: NOTIFICATIONS.IOS_BUNDLE,
         webrtc_ready: notification.webrtc_ready,
         call_rejected: notification.call_rejected,
         call_cancelled: notification.call_cancelled,

@@ -205,7 +205,7 @@ request
 
 ## Sockets data
 
-Sockets are user for communication between this server and [front end app](https://github.com/aculab-com/webrtc-demo-client).
+Sockets are used for communication between this server and [front end app](https://github.com/aculab-com/webrtc-demo-client).
 
 ### Emit data
 
@@ -341,7 +341,7 @@ callback: returns an object
 
 ## Important Notes
 
-You cannot call a user which is not registered on server, therefore if you wanna call a web browser it has to be registered using "platform": "web" and it needs to have "webrtcToken" not null (any string, e.g. "fake_token").
+You cannot call a non-registered user, therefore if you want to call a web browser it has to be registered using "platform": "web" and it needs to have "webrtcToken" not null (any string is ok, e.g. "fake_token").
 
 ## Testing
 
