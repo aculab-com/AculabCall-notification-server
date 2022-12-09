@@ -1,7 +1,17 @@
 import { Request, Response } from 'express';
 import { getToken } from '../middleware/userRegistration';
 import type { User } from '../types/types';
-import { connectDb, createNewUser, deleteUser, getAllUsers, getUser, updateFcmToken, updateIosToken, updatePlatform, updateWebrtcToken } from '../middleware/dbHandler';
+import {
+  connectDb,
+  createNewUser,
+  deleteUser,
+  getAllUsers,
+  getUser,
+  updateFcmToken,
+  updateIosToken,
+  updatePlatform,
+  updateWebrtcToken,
+} from '../middleware/dbHandler';
 
 import { WEBRTC_REGISTRATION } from '../constants';
 
@@ -14,7 +24,7 @@ export const routeAllUsers = (req: Request, res: Response) => {
   const db = connectDb();
   getAllUsers(db, (data: any) => {
     res.status(200).json(data);
-  })
+  });
 };
 
 /**
@@ -24,23 +34,23 @@ export const routeAllUsers = (req: Request, res: Response) => {
  */
 export const routeGetUser = async (req: Request, res: Response) => {
   if (!req.body.username) {
-    return res.status(400).json({message: 'username is required'});
-  };
+    return res.status(400).json({ message: 'username is required' });
+  }
   const db = connectDb();
   const user = await getUser(db, req.body.username)
-    .then(data => {
-      return data
+    .then((data) => {
+      return data;
     })
-    .catch(err => {
+    .catch((err) => {
       console.error(err);
-      return err
+      return err;
     });
+  db.close(); // closing db connection
 
-  db.close(); //closing connection
   if (user) {
     return res.status(200).json(user);
   } else {
-    return res.status(400).json({message: 'username not found'});
+    return res.status(400).json({ message: 'username not found' });
   }
 };
 
@@ -53,26 +63,26 @@ export const routeGetUser = async (req: Request, res: Response) => {
  */
 export const routeCreateNewUser = async (req: Request, res: Response) => {
   if (!req.body.username) {
-    return res.status(400).json({message: 'username is required'});
-  };
+    return res.status(400).json({ message: 'username is required' });
+  }
   if (!req.body.platform) {
-    return res.status(400).json({message: 'platform is required'});
-  };
+    return res.status(400).json({ message: 'platform is required' });
+  }
 
   const db = connectDb();
   // check if user exist
   const existingUser = await getUser(db, req.body.username)
-    .then(data => {
-      return data
+    .then((data) => {
+      return data;
     })
-    .catch(err => {
+    .catch((err) => {
       console.error(err);
-      return err
+      return err;
     });
 
   if (existingUser) {
-    db.close(); //closing connection
-    return res.status(400).json({message: 'username already exists'});
+    db.close(); // closing db connection
+    return res.status(400).json({ message: 'username already exists' });
   }
 
   const newUser: User = {
@@ -96,25 +106,25 @@ export const routeCreateNewUser = async (req: Request, res: Response) => {
     newUser.webrtcToken = webRtcToken;
 
     const createdUser: any = await createNewUser(db, newUser)
-    .then(data => {
-      return data
-    })
-    .catch(err => {
-      console.error(err);
-      return err
-    });
+      .then((data) => {
+        return data;
+      })
+      .catch((err) => {
+        console.error(err);
+        return err;
+      });
+    db.close(); // closing db connection
 
-    db.close(); //closing connection
     if (createdUser) {
-      return res.status(200).json({
+      return res.status(201).json({
         username: createdUser.username,
         webrtcToken: createdUser.webrtcToken,
         webrtcAccessKey: WEBRTC_REGISTRATION.WEBRTC_ACCESS_KEY,
         cloudRegionId: WEBRTC_REGISTRATION.CLOUD_REGION_ID,
-        logLevel: WEBRTC_REGISTRATION.LOG_LEVEL
+        logLevel: WEBRTC_REGISTRATION.LOG_LEVEL,
       });
     }
-  return res.status(400).json({error: 'user not created'});
+    return res.status(400).json({ error: 'user not created' });
   }
 };
 
@@ -127,26 +137,28 @@ export const routeCreateNewUser = async (req: Request, res: Response) => {
  */
 export const refreshWebrtcToken = async (req: Request, res: Response) => {
   if (!req.body.username) {
-    return res.status(400).json({message: 'username is required'});
-  };
+    return res.status(400).json({ message: 'username is required' });
+  }
   if (!req.body.platform) {
-    return res.status(400).json({message: 'platform is required'});
-  };
+    return res.status(400).json({ message: 'platform is required' });
+  }
 
   const db = connectDb();
   // check if user exist
   const existingUser = await getUser(db, req.body.username)
-    .then(data => {
-      return data
+    .then((data) => {
+      return data;
     })
-    .catch(err => {
+    .catch((err) => {
       console.error(err);
-      return err
+      return err;
     });
 
   if (!existingUser) {
-    db.close(); //closing connection
-    return res.status(400).json({message: `username ${req.body.username} not found`});
+    db.close(); // closing db connection
+    return res
+      .status(400)
+      .json({ message: `username ${req.body.username} not found` });
   }
 
   const webRtcToken = await getToken({
@@ -161,29 +173,29 @@ export const refreshWebrtcToken = async (req: Request, res: Response) => {
 
   if (webRtcToken) {
     existingUser.webrtcToken = webRtcToken;
-    existingUser.platform = req.body.platform
+    existingUser.platform = req.body.platform;
 
     const updatedUser: any = await updateWebrtcToken(db, existingUser)
-    .then(() => updatePlatform(db, existingUser))
-    .then(data => {
-      return data
-    })
-    .catch(err => {
-      console.error(err);
-      return err
-    });
+      .then(() => updatePlatform(db, existingUser))
+      .then((data) => {
+        return data;
+      })
+      .catch((err) => {
+        console.error(err);
+        return err;
+      });
+    db.close(); // closing db connection
 
-    db.close(); //closing connection
     if (updatedUser) {
       return res.status(200).json({
         username: updatedUser.username,
         webrtcToken: updatedUser.webrtcToken,
         webrtcAccessKey: WEBRTC_REGISTRATION.WEBRTC_ACCESS_KEY,
         cloudRegionId: WEBRTC_REGISTRATION.CLOUD_REGION_ID,
-        logLevel: WEBRTC_REGISTRATION.LOG_LEVEL
+        logLevel: WEBRTC_REGISTRATION.LOG_LEVEL,
       });
     }
-  return res.status(400).json({error: 'Token not refreshed'});
+    return res.status(400).json({ error: 'Token not refreshed' });
   }
 };
 
@@ -195,29 +207,31 @@ export const refreshWebrtcToken = async (req: Request, res: Response) => {
  */
 export const routeUpdateUser = async (req: Request, res: Response) => {
   if (!req.body.username) {
-    return res.status(400).json({message: 'username is required'});
-  };
+    return res.status(400).json({ message: 'username is required' });
+  }
   if (!req.body.platform) {
-    return res.status(400).json({message: 'platform is required'});
-  };
+    return res.status(400).json({ message: 'platform is required' });
+  }
   if (!req.body.fcmDeviceToken) {
-    return res.status(400).json({message: 'fcmDeviceToken is required'});
-  };
+    return res.status(400).json({ message: 'fcmDeviceToken is required' });
+  }
 
   const db = connectDb();
   // check if user exist
   const existingUser = await getUser(db, req.body.username)
-    .then(data => {
-      return data
+    .then((data) => {
+      return data;
     })
-    .catch(err => {
+    .catch((err) => {
       console.error(err);
-      return err
+      return err;
     });
 
   if (!existingUser) {
-    db.close(); //closing connection
-    return res.status(400).json({message: `username ${req.body.username} not found`});
+    db.close(); // closing db connection
+    return res
+      .status(400)
+      .json({ message: `username ${req.body.username} not found` });
   }
 
   existingUser.fcmDeviceToken = req.body.fcmDeviceToken;
@@ -227,22 +241,22 @@ export const routeUpdateUser = async (req: Request, res: Response) => {
   }
 
   const updatedUser: any = await updateWebrtcToken(db, existingUser)
-  .then(() => updatePlatform(db, existingUser))
-  .then(() => updateFcmToken(db, existingUser))
-  .then(() => updateIosToken(db, existingUser))
-  .then(data => {
-    return data
-  })
-  .catch(err => {
-    console.error(err);
-    return err
-  });
+    .then(() => updatePlatform(db, existingUser))
+    .then(() => updateFcmToken(db, existingUser))
+    .then(() => updateIosToken(db, existingUser))
+    .then((data) => {
+      return data;
+    })
+    .catch((err) => {
+      console.error(err);
+      return err;
+    });
+  db.close(); // closing db connection
 
-  db.close(); //closing connection
   if (updatedUser) {
-    return res.status(200).json({message: updatedUser});
+    return res.status(200).json({ message: updatedUser });
   }
-  return res.status(400).json({error: 'user was not updated'});
+  return res.status(400).json({ error: 'user was not updated' });
 };
 
 /**
@@ -253,26 +267,130 @@ export const routeUpdateUser = async (req: Request, res: Response) => {
  */
 export const routeDeleteUser = async (req: Request, res: Response) => {
   if (!req.body.username) {
-    return res.status(400).json({message: 'username is required'});
+    return res.status(400).json({ message: 'username is required' });
   }
 
   const db = connectDb();
 
   const existingUser = await getUser(db, req.body.username)
-    .then(data => {
+    .then((data) => {
       if (data) {
-        deleteUser(db, req.body.username)
+        deleteUser(db, req.body.username);
       }
-      return data
+      return data;
     })
-    .catch(err => {
+    .catch((err) => {
       console.error(err);
-      return err
+      return err;
+    });
+  db.close(); // closing db connection
+
+  if (existingUser) {
+    return res
+      .status(200)
+      .json({ message: `user ${req.body.username} was deleted` });
+  }
+  return res
+    .status(400)
+    .json({ error: `user ${req.body.username} was not found` });
+};
+
+/**
+ * creates user if the username is free
+ * also it assigns webRTC Token
+ * @param {User} user user object (requires username)
+ * @returns object with information about new user created or error
+ */
+export const socketCreateNewUser = async (user: User) => {
+  if (!user.username) {
+    return { message: 'username is required' };
+  }
+  if (!user.logLevel) {
+    return { message: 'logLevel is required' };
+  }
+
+  const db = connectDb();
+  // check if user exist
+  const existingUser = await getUser(db, user.username)
+    .then((data) => {
+      return data;
+    })
+    .catch((err) => {
+      console.error(err);
+      return err;
     });
 
-  db.close(); //closing connection
   if (existingUser) {
-    return res.status(200).json({message: `user ${req.body.username} was deleted`});
+    db.close(); // closing db connection
+    return { message: 'username already exists' };
   }
-  return res.status(400).json({error: `user ${req.body.username} was not found`});
+
+  const newUser: User = {
+    username: user.username,
+    fcmDeviceToken: user.fcmDeviceToken,
+    iosDeviceToken: user.iosDeviceToken,
+    platform: 'web',
+  };
+
+  const webRtcToken = await getToken({
+    registerClientId: newUser.username,
+    tokenLifeTime: WEBRTC_REGISTRATION.TOKEN_LIFE_TIME,
+    enableIncomingCall: WEBRTC_REGISTRATION.ENABLE_INCOMING_CALL,
+    callClientRange: WEBRTC_REGISTRATION.CALL_CLIENT_RANGE,
+    cloudRegionId: WEBRTC_REGISTRATION.CLOUD_REGION_ID,
+    cloudUsername: WEBRTC_REGISTRATION.CLOUD_USER_NAME,
+    apiAccessKey: WEBRTC_REGISTRATION.API_ACCESS_KEY,
+  });
+
+  if (webRtcToken) {
+    newUser.webrtcToken = webRtcToken;
+
+    const createdUser: any = await createNewUser(db, newUser)
+      .then((data) => {
+        return data;
+      })
+      .catch((err) => {
+        console.error(err);
+        return err;
+      });
+    db.close(); // closing db connection
+
+    if (createdUser) {
+      return {
+        username: createdUser.username,
+        webrtcToken: createdUser.webrtcToken,
+        webrtcAccessKey: WEBRTC_REGISTRATION.WEBRTC_ACCESS_KEY,
+        cloudRegionId: WEBRTC_REGISTRATION.CLOUD_REGION_ID,
+        logLevel: user.logLevel,
+      };
+    }
+    return { message: 'user not created' };
+  }
+};
+
+/**
+ * delete user from database
+ * @param {string} username username of a user to be deleted
+ * @returns information if user was or was not deleted
+ */
+export const socketDeleteUser = async (username: string) => {
+  const db = connectDb();
+
+  const existingUser = await getUser(db, username)
+    .then((data) => {
+      if (data) {
+        deleteUser(db, username);
+      }
+      return data;
+    })
+    .catch((err) => {
+      console.error(err);
+      return err;
+    });
+  db.close(); // closing db connection
+
+  if (existingUser) {
+    return { message: 'user deleted' };
+  }
+  return { message: 'user not deleted' };
 };

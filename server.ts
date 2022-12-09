@@ -1,8 +1,9 @@
 import express, { Express } from 'express';
 import path from 'path';
 import cors from 'cors';
+import { Server, Socket } from 'socket.io';
 
-import corsOptions from './config/cordOptions';
+// import corsOptions from './config/cordOptions';
 import { logger } from './middleware/logEvents';
 import errorHandler from './middleware/errorHandler';
 
@@ -10,17 +11,38 @@ import root from './routes/root';
 import users from './routes/api/users';
 import notifications from './routes/api/notifications';
 import { connectDb } from './middleware/dbHandler';
+import {
+  socketCreateNewUser,
+  socketDeleteUser,
+} from './controllers/usersController';
+import {
+  notificationEvent,
+  socketNewCallNotification,
+  socketNewNotification,
+} from './controllers/notificationsController';
+import {
+  CallNotification,
+  Notification,
+  OutboundCall,
+  RegResponse,
+  unRegResponse,
+  User,
+} from './types/types';
+
+// front end app url
+const CLIENT_URL = 'http://localhost:3000';
 
 const db = connectDb();
 
-db.serialize(function() {
+db.serialize(function () {
   // create users table if it does not exist
   db.run(
     'CREATE TABLE IF NOT EXISTS users(username, webrtcToken, platform, fcmDeviceToken, iosDeviceToken)'
   );
-})
+});
 db.close();
 
+// server port
 const PORT = process.env.PORT || 3500;
 const app: Express = express();
 // express works like a waterfall, therefore higher lines of code are executed before lower lines of code
@@ -28,8 +50,15 @@ const app: Express = express();
 // custom middleware logger
 app.use(logger);
 
+app.use(
+  '/aculab_webrtc',
+  express.static(__dirname + '/node_modules/aculab-webrtc')
+);
+app.use('/root', express.static(__dirname + '/'));
+
 // Cross Origin Resource Sharing
-app.use(cors(corsOptions));
+// app.use(cors(corsOptions));
+app.use(cors());
 
 // built-in middleware to handle urlencoded data
 // in other words, form data:
@@ -60,4 +89,101 @@ app.all('*', (req, res) => {
 
 app.use(errorHandler);
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+const server = app.listen(PORT, () =>
+  console.log(`Server running on port ${PORT}`)
+);
+
+// create io server/socket
+const io = new Server(server, {
+  cors: {
+    origin: '*',
+  },
+});
+
+// io socket connected
+io.on('connection', (socket: Socket) => {
+  console.log('connected socket.io id:', socket.id);
+
+  // register user received via socket.io
+  socket.on('register', async (newUser: User, callBack) => {
+    const userCreated = await socketCreateNewUser(newUser);
+    let data: RegResponse;
+
+    if (userCreated) {
+      if (userCreated.message) {
+        data = {
+          status: 'error',
+          data: userCreated,
+        };
+      } else {
+        data = {
+          status: 'userCreated',
+          data: userCreated as User,
+        };
+      }
+    } else {
+      data = {
+        status: 'error',
+        data: { message: 'User not created' },
+      };
+    }
+    callBack(data);
+  });
+
+  // unregister user received via socket.io
+  socket.on('unregister_user', async (username: string, callBack) => {
+    const response = await socketDeleteUser(username);
+    let data: unRegResponse;
+
+    if (response) {
+      data = {
+        status: 'deleted',
+        message: response.message,
+      };
+    } else {
+      data = {
+        status: 'error',
+        message: 'user not deleted',
+      };
+    }
+    callBack(data);
+  });
+
+  // send call notification received via socket.io
+  socket.on(
+    'call_notification',
+    async (callNotification: CallNotification, callBack) => {
+      const response: { message: string } = await socketNewCallNotification(
+        callNotification
+      );
+
+      if (response) {
+        callBack(response.message);
+      } else {
+        callBack('problems sending notification');
+      }
+    }
+  );
+
+  // transmit via socket.io, used for letting browser know that iOS or Android
+  // WebRTC module is ready to receive WebRTC call
+  notificationEvent.on('silent_notification', (data: Notification) => {
+    socket.emit('silent_notification', data);
+  });
+
+  // send cancel call notification to ios/android
+  // used when call canceled in browser before WebRTC connection is established
+  socket.on('call_cancelled', async (data: OutboundCall, callBack) => {
+    const result = await socketNewNotification(data);
+
+    if (result) {
+      callBack(result);
+    }
+  });
+
+  // disconnect the socket
+  socket.on('disconnect', () => {
+    notificationEvent.removeAllListeners();
+    console.log('socket.io: user disconnected');
+  });
+});

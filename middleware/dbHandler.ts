@@ -7,7 +7,6 @@ import { User } from '../types/types';
  export const connectDb = () => {
   const db = new sqlite3.Database('./notificationServer.db', sqlite3.OPEN_READWRITE, err => {
     if (err) return console.error('db error', err.message);
-
     console.log('db connected');
   });
 

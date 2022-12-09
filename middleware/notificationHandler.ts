@@ -47,11 +47,9 @@ export const sendCallNotificationIos = async (
     .send(note, data.iosDeviceToken as string)
     .then((result: any) => {
       if (JSON.stringify(result.sent).length > 4) {
-        console.log('notification sent');
         // let the phone know that notification has been sent
         return 'success';
       } else {
-        console.log('notification not sent', result);
         return 'fail';
       }
     });

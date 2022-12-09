@@ -17,6 +17,14 @@ Please note that Firebase Cloud Messaging (FCM) notifications can be used for ca
     - [/users](#users)
     - [/users/user](#usersuser)
     - [/users/get_token](#usersget_token)
+  - [Sockets data](#sockets-data)
+    - [Emit data](#emit-data)
+      - ['silent_notification'](#silent_notification)
+    - [Receive data](#receive-data)
+      - ['register'](#register)
+      - ['unregister_user'](#unregister_user)
+      - ['call_notification'](#call_notification)
+      - ['call_cancelled'](#call_cancelled)
   - [Important Notes](#important-notes)
   - [Testing](#testing)
   - [Register/Login user workflow](#registerlogin-user-workflow)
@@ -97,6 +105,21 @@ Install dependencies
 
 ```terminal
 npm install
+```
+
+Build WebRTC Demo for testing
+
+```terminal
+npm run build-webrtc-demo
+```
+
+set up sockets for communication between the server and webrtc-demo-client:  
+In root folder in server.ts file edit CLIENT_URL to hold webrtc-demo-client url:port
+
+for example:
+
+```typescript
+const CLIENT_URL = 'http://localhost:3000';
 ```
 
 To run the server use run bellow command from root folder
@@ -180,9 +203,145 @@ request
 }
 ```
 
+## Sockets data
+
+Sockets are used for communication between this server and [front end app](https://github.com/aculab-com/webrtc-demo-client).
+
+### Emit data
+
+example of emitting data:
+
+```ts
+socket.emit('silent_notification', data);
+```
+
+#### 'silent_notification'
+
+argument: an object
+
+```ts
+{
+  uuid: string,
+  caller: string,
+  callee: string,
+  webrtc_ready?: boolean, // not required
+  call_rejected?: boolean, // not required
+  call_cancelled?: boolean, // not required
+}
+```
+
+callback: no callback
+
+### Receive data
+
+example of receiving data:
+
+```ts
+socket.on('register', async (newUser: User, callBack) => {
+  // process received data
+  const userCreated = await socketCreateNewUser(newUser);
+
+  // send response via callback is present
+  if (userCreated) {
+      callBack('example: User created');
+  } else {
+    callBack('example: User not created');
+  }
+});
+```
+
+#### 'register'
+
+receiving data: an object
+
+```ts
+{
+  username: string,
+  webrtcToken?: string, // not required
+  fcmDeviceToken?: string, // not required
+  iosDeviceToken?: string, // not required
+  platform?: string, // not required
+  logLevel?: string // not required
+}
+```
+
+callback:  
+if error returns an object
+
+```ts
+{
+  status: 'error',
+  data: {
+    message: string
+  }
+}
+```
+
+if success returns an object
+
+```ts
+{
+  status: 'userCreated',
+  data: {
+    username: string,
+    webrtcToken: string,
+    webrtcAccessKey: string,
+    cloudRegionId: string,
+    logLevel: string
+  }
+}
+```
+
+#### 'unregister_user'
+
+receiving data: username as string  
+callback: return an object  
+
+```ts
+{
+  status: string,
+  message: string
+}
+```
+
+#### 'call_notification'
+
+receiving data: an object
+
+```ts
+{
+  uuid: string,
+  caller: string,
+  callee: string
+}
+```
+
+callback: returns a string message
+
+#### 'call_cancelled'
+
+receiving data: an object
+
+```ts
+{
+  uuid: string,
+  caller: string,
+  callee: string,
+  call_cancelled: boolean
+}
+```
+
+callback: returns an object
+
+```ts
+{
+  message: string
+}
+```
+
 ## Important Notes
 
-You cannot call a user which is not registered on server, therefore if you wanna call a web browser it has to be registered using "platform": "web" and it needs to have "webrtcToken" not null (any string, e.g. "fake_token").
+You cannot call a non-registered user, therefore if you want to call a web browser it has to be registered using "platform": "web" and it needs to have "webrtcToken" not null (any string is ok, e.g. "fake_token").
 
 ## Testing
 

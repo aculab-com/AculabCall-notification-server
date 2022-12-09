@@ -4,6 +4,7 @@ export interface User {
   fcmDeviceToken?: string;
   iosDeviceToken?: string;
   platform?: string;
+  logLevel?: string | number;
 }
 
 export interface UsersData {
@@ -11,10 +12,13 @@ export interface UsersData {
   setUsers: (data: Array<User>) => void;
 }
 
-export interface Notification {
+export interface CallNotification {
   uuid: string;
   caller: string;
   callee: string;
+}
+
+export interface Notification extends CallNotification {
   webrtc_ready?: boolean;
   call_rejected?: boolean;
   call_cancelled?: boolean;
@@ -54,4 +58,21 @@ export interface WebRTCToken {
   cloudRegionId: string;
   cloudUsername: string;
   apiAccessKey: string;
+}
+
+export interface RegResponse {
+  status: 'userCreated' | 'error';
+  data: User | { message: string };
+}
+
+export interface unRegResponse {
+  status: 'error' | 'deleted';
+  message: string;
+}
+
+export interface OutboundCall {
+  uuid: string;
+  caller: string;
+  callee: string;
+  call_cancelled?: boolean;
 }
